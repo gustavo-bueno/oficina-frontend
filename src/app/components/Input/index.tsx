@@ -9,19 +9,20 @@ type InputProps = {
 
 const input = tv({
   slots: {
-    container: 'h-[58px] w-full rounded-lg p-[12px] bg-lightGrey',
+    container: 'h-[58px] w-full rounded-lg p-[12px] text-black bg-lightGrey',
   }
 })
 
 const Input = ({
   name,
+  className,
   ...props
 }: InputProps) => {
   const { register } = useFormContext()
   const { container } = input()
 
   return (
-    <input className={container()} {...props} {...register(name)} />
+    <input className={container({ className })} {...props} {...register(name)} />
   )
 }
 

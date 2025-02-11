@@ -1,24 +1,26 @@
 
-import { ReactNode } from 'react'
+import { ButtonHTMLAttributes, ReactNode } from 'react'
 import { tv } from 'tailwind-variants'
 
 type ButtonProps = {
   children: ReactNode;
-}
+} & ButtonHTMLAttributes<HTMLButtonElement>
 
 const button = tv({
   slots: {
-    container: 'h-[58px] px-[64px] bg-primary border-none',
+    container: 'h-[58px] px-[64px] bg-primary border-none font-bold text-[18px] rounded-lg',
   }
 })
 
 const Button = ({
-  children
+  children,
+  className,
+  ...props
 }: ButtonProps) => {
   const { container } = button()
 
   return (
-    <button className={container()}>
+    <button {...props} className={container({ className })}>
       {children}
     </button>
   )
