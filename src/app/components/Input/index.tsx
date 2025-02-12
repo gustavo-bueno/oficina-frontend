@@ -1,29 +1,53 @@
-
-import { InputHTMLAttributes } from 'react'
-import { useFormContext } from 'react-hook-form';
-import { tv } from 'tailwind-variants'
+import { InputHTMLAttributes } from "react";
+import { useFormContext } from "react-hook-form";
+import { tv } from "tailwind-variants";
 
 type InputProps = {
   name: string;
-} & InputHTMLAttributes<HTMLInputElement>
+  errorMessage?: string;
+  error?: boolean;
+} & InputHTMLAttributes<HTMLInputElement>;
 
 const input = tv({
   slots: {
-    container: 'h-[58px] w-full rounded-lg p-[12px] text-black bg-lightGrey',
-  }
-})
+    field:
+      "h-[52px] placeholder-grey w-full rounded-lg px-[16px] outline-primary py-[12px] text-black bg-input",
+    container: "w-full",
+  },
+  variants: {
+    status: {
+      error: {
+        field: "border-red-600 border",
+      },
+      default: {
+        field: "",
+      },
+    },
+  },
+});
 
 const Input = ({
   name,
   className,
+  error,
+  errorMessage,
   ...props
 }: InputProps) => {
-  const { register } = useFormContext()
-  const { container } = input()
+  const { register } = useFormContext();
+  const { field, container } = input();
 
   return (
-    <input className={container({ className })} {...props} {...register(name)} />
-  )
-}
+    <div className={container({ className })}>
+      <input
+        className={field({ status: error ? "error" : "default" })}
+        {...props}
+        {...register(name)}
+      />
+      {error && errorMessage && (
+        <p className="text-red-600 mt-2">{errorMessage}</p>
+      )}
+    </div>
+  );
+};
 
-export default Input
+export default Input;

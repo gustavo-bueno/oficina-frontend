@@ -15,6 +15,7 @@ export default {
         darkGrey: '#777777',
         grey: '#555555',
         lightGrey: '#D9D9D9',
+        input: '#ECECEC',
         background: "#F6F6F6",
       },
       boxShadow: {
