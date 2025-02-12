@@ -1,45 +1,48 @@
 import MeetingCard from "@/app/components/MeetingCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CreateMeetingModal, { MeetingData } from "./CreateMeetingModal";
 import MeetingDetailsModal from "./MeetingModal";
+import { getGroupMeetings, Meeting } from "@/app/services/meetings";
+import { useSession } from "next-auth/react";
 
 type MeetingsProps = {
   groupId: string;
 };
 
-type MeetingProps = MeetingData & { completed: boolean };
-
 const Meetings = ({ groupId }: MeetingsProps) => {
-  const [meetings, setMeetings] = useState<MeetingProps[]>([
-    {
-      number: "2",
-      date: "2025-02-18",
-      mentors: ["Ana", "Maria"],
-      obs: "Citar ferramentas gratuitas disponíveis",
-      subject: "Plano de negócios",
-      completed: false,
-    },
-    {
-      number: "3",
-      date: "2025-02-12",
-      mentors: ["Ana", "Maria"],
-      obs: "Citar ferramentas gratuitas disponíveis",
-      subject: "Plano de negócios",
-      completed: true,
-    },
-  ]);
-  const [meetingToShow, setMeetingToShow] = useState<MeetingProps>({
-    number: "",
-    date: "",
-    mentors: [],
-    subject: "",
-    completed: false,
+  const { data: session } = useSession();
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [meetingToShow, setMeetingToShow] = useState<Meeting>({
+    _id: "",
+    data: "",
+    usuarios: [],
+    tema: "",
+    concluido: false,
+    observacoes: "",
+    local: "",
+    hora: "",
+    grupoID: "",
   });
   const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
   const [showMeetingDetailsModal, setShowMeetingDetailsModal] = useState(false);
+  const token = session?.user.token ?? "";
 
-  const completedMeetings = meetings.filter((meeting) => meeting.completed);
-  const upcomingMeetings = meetings.filter((meeting) => !meeting.completed);
+  useEffect(() => {
+    const loadMeetings = async () => {
+      setLoading(true);
+      const groupList = await getGroupMeetings(token ?? "", groupId);
+      setMeetings(groupList);
+      setLoading(false);
+    };
+
+    if (token) loadMeetings();
+  }, [token]);
+
+  const completedMeetings = meetings.filter((meeting) => meeting.concluido);
+  const upcomingMeetings = meetings.filter((meeting) => !meeting.concluido);
+
+  console.log(upcomingMeetings);
 
   return (
     <div>
@@ -62,34 +65,42 @@ const Meetings = ({ groupId }: MeetingsProps) => {
         </button>
       </div>
       <div className="flex flex-wrap gap-[32px] mt-5 mb-10 overflow-x-auto pb-1">
-        {upcomingMeetings.map((meeting) => (
+        {upcomingMeetings.map((encontro) => (
           <MeetingCard
-            key={meeting.number}
-            {...meeting}
-            date={new Date(meeting.date)}
+            key={encontro._id}
+            {...encontro}
+            date={encontro.data}
+            subject={encontro.tema}
+            completed={encontro.concluido}
             onClick={() => {
-              setMeetingToShow(meeting);
+              setMeetingToShow(encontro);
               setShowMeetingDetailsModal(true);
             }}
           />
         ))}
       </div>
-      <h2 className="text-[28px] font-bold text-primary">
-        Encontros concluídos
-      </h2>
-      <div className="flex flex-wrap gap-[32px] mt-5 mb-10 overflow-x-auto pb-1">
-        {completedMeetings.map((meeting) => (
-          <MeetingCard
-            key={meeting.number}
-            {...meeting}
-            date={new Date(meeting.date)}
-            onClick={() => {
-              setMeetingToShow(meeting);
-              setShowMeetingDetailsModal(true);
-            }}
-          />
-        ))}
-      </div>
+      {completedMeetings.length > 0 ? (
+        <>
+          <h2 className="text-[28px] font-bold text-primary">
+            Encontros concluídos
+          </h2>
+          <div className="flex flex-wrap gap-[32px] mt-5 mb-10 overflow-x-auto pb-1">
+            {completedMeetings.map((encontro) => (
+              <MeetingCard
+                key={encontro._id}
+                {...encontro}
+                date={encontro.data}
+                subject={encontro.tema}
+                completed={encontro.concluido}
+                onClick={() => {
+                  setMeetingToShow(encontro);
+                  setShowMeetingDetailsModal(true);
+                }}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };

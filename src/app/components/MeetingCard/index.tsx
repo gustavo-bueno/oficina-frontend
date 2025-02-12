@@ -1,24 +1,25 @@
 import { RiCheckFill, RiTimeLine } from "@remixicon/react";
 
 type MeetingCardProps = {
-  number: string;
-  date: Date;
+  date: string;
   subject: string;
   completed?: boolean;
   onClick: () => void;
 };
 
 const MeetingCard = ({
-  number,
   date,
   subject,
   onClick,
   completed = false,
 }: MeetingCardProps) => {
-  const formattedDate = new Date(date).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-  });
+  const formattedDate = new Date(date.replaceAll("/", "-")).toLocaleDateString(
+    "pt-BR",
+    {
+      day: "2-digit",
+      month: "2-digit",
+    },
+  );
 
   return (
     <article
@@ -30,7 +31,9 @@ const MeetingCard = ({
           <RiTimeLine />
           <p>{formattedDate}</p>
         </div>
-        <h3 className="text-[22px] font-bold mt-1">Encontro {number}</h3>
+        <h3 className="text-[22px] font-bold mt-1">
+          Encontro ({formattedDate})
+        </h3>
       </div>
       <div className="flex items-center justify-between gap-[8px]">
         <p className="text-[18px] font-medium">{subject}</p>

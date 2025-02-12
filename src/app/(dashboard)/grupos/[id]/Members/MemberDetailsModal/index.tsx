@@ -1,31 +1,30 @@
 import DeleteButton from "@/app/components/DeleteButton";
 import Modal, { ModalProps } from "@/app/components/Modal";
-import { GroupMemberFormData } from "../CreateMemberModal";
+import { Integrante } from "@/app/services/groups";
 
-type MemberDetailsModalProps = GroupMemberFormData &
-  Omit<ModalProps, "title"> & { id: string };
+type MemberDetailsModalProps = Integrante & Omit<ModalProps, "title">;
 
 const MemberDetailsModal = ({
-  id,
-  birthDate,
+  _id,
+  dataNascimento,
   email,
-  name,
-  phone,
-  school,
+  nome,
+  telefone,
+  escola,
   ...props
 }: MemberDetailsModalProps) => {
   const deleteModal = () => {
-    console.log(id);
+    console.log(_id);
   };
 
-  const formattedDate = new Date(birthDate).toLocaleDateString("pt-BR", {
+  const formattedDate = new Date(dataNascimento).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
 
   return (
-    <Modal {...props} title={name}>
+    <Modal {...props} title={nome}>
       <div className="relative min-h-[400px]">
         <DeleteButton
           className="absolute right-[60px] top-[-40px]"
@@ -35,13 +34,13 @@ const MemberDetailsModal = ({
           Data de nascimento: {formattedDate}
         </p>
         <h4 className="text-[18px] font-bold mt-8 text-primary">Escola</h4>
-        <p className="text-[22px] text-black font-medium mb-6">{school}</p>
+        <p className="text-[22px] text-black font-medium mb-6">{escola}</p>
 
         <h4 className="text-[18px] font-bold mt-8 text-primary">Email</h4>
         <p className="text-[22px] text-black font-medium mb-6">{email}</p>
 
         <h4 className="text-[18px] font-bold mt-8 text-primary">Telefone</h4>
-        <p className="text-[22px] text-black font-medium mb-6">{phone}</p>
+        <p className="text-[22px] text-black font-medium mb-6">{telefone}</p>
       </div>
     </Modal>
   );

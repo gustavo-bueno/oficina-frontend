@@ -6,19 +6,23 @@ import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 const createGroupMemberSchema = yup.object().shape({
-  name: yup
+  nome: yup
     .string()
     .required("Campo obrigatório")
     .min(2, "O campo deve ter no mínimo dois caracteres"),
-  birthDate: yup.string().required("Campo obrigatório"),
-  school: yup.string().required("Campo obrigatório"),
+  dataNascimento: yup.string().required("Campo obrigatório"),
+  escola: yup.string().required("Campo obrigatório"),
   email: yup.string().required("Campo obrigatório").email("Email inválido"),
-  phone: yup.string().required("Campo obrigatório"),
+  telefone: yup.string().required("Campo obrigatório"),
 });
 
 export type GroupMemberFormData = yup.InferType<typeof createGroupMemberSchema>;
 
-const CreateGroupMemberModal = (props: Omit<ModalProps, "title">) => {
+type CreateGroupMemberModalProps = {
+  groupId: string;
+} & Omit<ModalProps, "title">;
+
+const CreateGroupMemberModal = (props: CreateGroupMemberModalProps) => {
   const createGroupMemberForm = useForm<GroupMemberFormData>({
     resolver: yupResolver(createGroupMemberSchema),
   });
@@ -40,7 +44,7 @@ const CreateGroupMemberModal = (props: Omit<ModalProps, "title">) => {
             <Input
               name="name"
               placeholder="Nome do grupo"
-              error={errors.name && errors.name?.message}
+              error={errors.nome && errors.nome?.message}
             />
             <div>
               <label htmlFor="date" className="text-black block mb-1">
@@ -51,14 +55,14 @@ const CreateGroupMemberModal = (props: Omit<ModalProps, "title">) => {
                 className="max-w-[200px]"
                 name="date"
                 placeholder="Data de nascimento"
-                error={errors.birthDate && errors.birthDate?.message}
+                error={errors.dataNascimento && errors.dataNascimento?.message}
               />
             </div>
 
             <Input
               name="school"
               placeholder="Escola"
-              error={errors.school && errors.school?.message}
+              error={errors.escola && errors.escola?.message}
             />
             <Input
               name="email"
@@ -66,14 +70,9 @@ const CreateGroupMemberModal = (props: Omit<ModalProps, "title">) => {
               error={errors.email && errors.email?.message}
             />
             <Input
-              name="name"
-              placeholder="Nome do grupo"
-              error={errors.name && errors.name?.message}
-            />
-            <Input
               name="phone"
               placeholder="Telefone"
-              error={errors.phone && errors.phone?.message}
+              error={errors.telefone && errors.telefone?.message}
             />
           </div>
           <Button className="max-w-[286px] self-end mt-5">Adicionar</Button>

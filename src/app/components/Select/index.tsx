@@ -71,8 +71,8 @@ export function Select({
           <option className={placeholderStyle()} value="" disabled hidden>
             {placeholder || "Select"}
           </option>
-          {options.map((item) => (
-            <option key={item.label} value={item.value || item.label}>
+          {options.map((item, index) => (
+            <option key={item.label + index} value={item.value || item.label}>
               {item.label}
             </option>
           ))}

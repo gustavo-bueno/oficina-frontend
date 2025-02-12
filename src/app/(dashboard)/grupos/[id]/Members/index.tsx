@@ -1,33 +1,33 @@
 import DeleteButton from "@/app/components/DeleteButton";
 import { useState } from "react";
-import CreateGroupMemberModal, {
-  GroupMemberFormData,
-} from "./CreateMemberModal";
+import CreateGroupMemberModal from "./CreateMemberModal";
 import MemberDetailsModal from "./MemberDetailsModal";
-
-type GroupMemberForm = {
-  id: string;
-} & GroupMemberFormData;
+import { Integrante } from "@/app/services/groups";
 
 type MembersProps = {
-  members: GroupMemberForm[];
+  members: Integrante[];
+  grupoId: string;
 };
 
-const Members = ({ members }: MembersProps) => {
+const Members = ({ members, grupoId }: MembersProps) => {
   const [openCreateMemberModal, setOpenCreateMemberModal] = useState(false);
   const [openMemberDetailsModal, setOpenMemberDetailsModal] = useState(false);
-  const [memberToShow, setMemberToShow] = useState<GroupMemberForm>({
-    id: "",
-    birthDate: "",
+  const [memberToShow, setMemberToShow] = useState<Integrante>({
+    _id: "",
+    dataNascimento: "",
     email: "",
-    name: "",
-    phone: "",
-    school: "",
+    nome: "",
+    escola: "",
+    telefone: "",
+    grupoID: "",
   });
+
+  console.log(members);
 
   return (
     <div>
       <CreateGroupMemberModal
+        groupId={grupoId}
         close={() => setOpenCreateMemberModal(false)}
         open={openCreateMemberModal}
       />
@@ -55,7 +55,7 @@ const Members = ({ members }: MembersProps) => {
             key={`member-${index}`}
             className="bg-white cursor-pointer font-medium text-black text-[20px] shadow-custom flex items-center justify-between rounded-lg p-[16px]"
           >
-            {member.name}
+            {member.nome}
             <div onClick={(e) => e.stopPropagation()}>
               <DeleteButton
                 onClick={() => {
