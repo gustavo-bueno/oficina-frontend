@@ -5,10 +5,11 @@ type StatusProps = {
   position: number;
   activePosition: number;
   name: string;
+  onClick: () => void;
 };
 
 const statusClassName = tv({
-  base: "h-[52px] rounded-lg font-medium text-[18px] flex items-center whitespace-nowrap gap-[10px] px-[32px] py-[16px]",
+  base: "h-[52px] rounded-lg cursor-pointer font-medium text-[18px] flex items-center whitespace-nowrap gap-[10px] px-[32px] py-[16px]",
   variants: {
     status: {
       active: "bg-primary text-white",
@@ -18,7 +19,7 @@ const statusClassName = tv({
   },
 });
 
-const Status = ({ name, position, activePosition }: StatusProps) => {
+const Status = ({ name, position, activePosition, onClick }: StatusProps) => {
   const status =
     activePosition > position
       ? "completed"
@@ -28,6 +29,7 @@ const Status = ({ name, position, activePosition }: StatusProps) => {
 
   return (
     <div
+      onClick={onClick}
       className={statusClassName({
         status,
       })}

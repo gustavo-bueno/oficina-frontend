@@ -28,7 +28,7 @@ const select = tv({
 });
 
 const field = tv({
-  base: "relative appearance-none h-[52px] text-grey w-full px-6 bg-input placeholder-grey rounded-lg outline-primary border hover:border-primary",
+  base: "relative appearance-none h-[52px] text-black w-full px-6 bg-input placeholder-grey rounded-lg outline-primary border hover:border-primary",
   variants: {
     status: {
       default: "",

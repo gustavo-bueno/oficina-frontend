@@ -1,20 +1,18 @@
 import { RiCheckFill, RiTimeLine } from "@remixicon/react";
 
 type MeetingCardProps = {
-  number: number;
+  number: string;
   date: Date;
   subject: string;
-  mentors: string[];
-  obs?: string;
   completed?: boolean;
+  onClick: () => void;
 };
 
 const MeetingCard = ({
   number,
   date,
   subject,
-  mentors,
-  obs,
+  onClick,
   completed = false,
 }: MeetingCardProps) => {
   const formattedDate = new Date(date).toLocaleDateString("pt-BR", {
@@ -23,7 +21,10 @@ const MeetingCard = ({
   });
 
   return (
-    <article className="w-[220px] h-[220px] bg-white rounded-lg p-[16px] text-black flex flex-col justify-between shadow-custom">
+    <article
+      onClick={onClick}
+      className="w-[220px] cursor-pointer h-[220px] bg-white rounded-lg p-[16px] text-black flex flex-col justify-between shadow-custom"
+    >
       <div>
         <div className="flex items-center gap-[8px] text-black text-[18px]">
           <RiTimeLine />
