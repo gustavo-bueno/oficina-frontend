@@ -1,12 +1,17 @@
-import { InputHTMLAttributes } from "react";
+import { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 import { useFormContext } from "react-hook-form";
 import { tv } from "tailwind-variants";
 
+type InputTypes =
+  | InputHTMLAttributes<HTMLInputElement>
+  | TextareaHTMLAttributes<HTMLTextAreaElement>;
+
 type InputProps = {
   name: string;
-  errorMessage?: string;
-  error?: boolean;
-} & InputHTMLAttributes<HTMLInputElement>;
+  error?: string;
+  as?: React.ElementType;
+  containerClassName?: string;
+} & InputTypes;
 
 const input = tv({
   slots: {
@@ -26,26 +31,28 @@ const input = tv({
   },
 });
 
+export const InputDefaultAsType = "input" as const;
+
 const Input = ({
   name,
   className,
   error,
-  errorMessage,
+  as,
+  containerClassName,
   ...props
 }: InputProps) => {
+  const Tag = as || InputDefaultAsType;
   const { register } = useFormContext();
   const { field, container } = input();
 
   return (
-    <div className={container({ className })}>
-      <input
-        className={field({ status: error ? "error" : "default" })}
+    <div className={container({ className: containerClassName })}>
+      <Tag
+        className={field({ status: error ? "error" : "default", className })}
         {...props}
         {...register(name)}
       />
-      {error && errorMessage && (
-        <p className="text-red-600 mt-2">{errorMessage}</p>
-      )}
+      {error && <p className="text-red-600 mt-2">{error}</p>}
     </div>
   );
 };

@@ -2,7 +2,9 @@
 
 import DeleteButton from "@/app/components/DeleteButton";
 import MeetingCard from "@/app/components/MeetingCard";
+import Modal from "@/app/components/Modal";
 import Status from "@/app/components/Status";
+import { useState } from "react";
 
 const integrantes = [
   {
@@ -28,8 +30,15 @@ const statuses = [
 const activeStatusPosition = 4;
 
 const Grupo = () => {
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="py-10">
+      <button onClick={() => setOpen(true)}>lala</button>
+      <Modal title="Editar grupo" open={open} close={() => setOpen(false)}>
+        <h5 className="text-black">Bora porra!!</h5>
+        Ihuuuul!!
+      </Modal>
       <div className="flex items-center justify-between mb-16">
         <h1 className="text-black text-[42px] font-bold">
           Meninas na computação

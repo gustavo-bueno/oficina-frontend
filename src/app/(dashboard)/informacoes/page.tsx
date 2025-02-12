@@ -1,63 +1,95 @@
 "use client";
 
-import Button from "@/app/components/Button";
-import Input from "@/app/components/Input";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { RiDeleteBinLine, RiExternalLinkLine } from "@remixicon/react";
+import { RiExternalLinkLine } from "@remixicon/react";
 import Link from "next/link";
-import { FormProvider, useForm } from "react-hook-form";
-import * as yup from "yup";
+import CreateInfoModal from "./CreateInfoModal";
+import { useState } from "react";
+import InfoModal from "./InfoModal";
 
-const mentorSchema = yup.object().shape({
-  email: yup.string().email("Email inválido").required("Campo obrigatório"),
-  name: yup
-    .string()
-    .min(2, "Mínimo de 8 caracteres")
-    .required("Campo obrigatório"),
-});
+type Info = {
+  id: string;
+  title: string;
+  content: string;
+};
 
-const Mentoras = () => {
-  const mentorForm = useForm<any>({
-    resolver: yupResolver(mentorSchema),
+const Informacoes = () => {
+  const [showCreateInfoModal, setShowCreateInfoModal] = useState(false);
+  const [showInfoDetailsModal, setShowInfoDetailsModal] = useState(false);
+  const [infoToOpen, setInfoToOpen] = useState<Info>({
+    id: "",
+    title: "",
+    content: "",
   });
-
-  const onSubmit = async () => {};
+  const [infos, setInfos] = useState<Array<Info>>([
+    {
+      id: "1",
+      title: "Sala de para encontros",
+      content: " Disponíveis: P104, P105, P106, P202",
+    },
+    {
+      id: "2",
+      title: "Templates Canva",
+      content: " Disponível em https://www.canva.com/templates/",
+    },
+  ]);
 
   return (
-    <div className="pt-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-black text-[42px] font-bold">Informações Gerais</h1>
-        <button className="text-secondary text-[22px] font-bold border-none p-4">
-          Adicionar informação
-        </button>
-      </div>
-
-      <Link
-        className="flex mb-10 mt-4 items-center text-primary font-bold text-[22px] gap-[8px]"
-        href="https://www.technovationbrasil.org/"
-      >
-        Site Technovation Girls
-        <RiExternalLinkLine />
-      </Link>
-
-      <div className="flex flex-wrap gap-[24px]">
-        <div className="w-[220px] h-[220px] bg-white p-[12px] shadow-custom rounded-lg flex flex-col justify-between">
-          <p className="text-[22px] text-black font-bold">
-            Sala de para encontros
-          </p>
-          <span className="text-grey text-ellipsis">
-            Disponíveis P104, P105, P106, P202
-          </span>
+    <>
+      <CreateInfoModal
+        open={showCreateInfoModal}
+        close={() => setShowCreateInfoModal(false)}
+      />
+      <InfoModal
+        open={showInfoDetailsModal}
+        close={() => setShowInfoDetailsModal(false)}
+        {...infoToOpen}
+      />
+      <div className="pt-10">
+        <div className="flex items-center justify-between">
+          <h1 className="text-black text-[42px] font-bold">
+            Informações Gerais
+          </h1>
+          <button
+            onClick={() => setShowCreateInfoModal(true)}
+            className="text-secondary text-[22px] font-bold border-none p-4"
+          >
+            Adicionar informação
+          </button>
         </div>
-        <div className="w-[220px] h-[220px] bg-white p-[12px] shadow-custom rounded-lg flex flex-col justify-between">
-          <p className="text-[22px] text-black font-bold">Templates Canva</p>
-          <span className="text-grey text-ellipsis overflow-hidden">
-            Disponível em https://www.canva.com/templates/
-          </span>
+
+        <Link
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex mb-10 mt-4 items-center text-primary font-bold text-[22px] gap-[8px]"
+          href="https://www.technovationbrasil.org/"
+        >
+          Site Technovation Girls
+          <RiExternalLinkLine />
+        </Link>
+
+        <div className="flex flex-wrap gap-[24px]">
+          {infos.map((info, index) => (
+            <button
+              key={`info-${index}`}
+              onClick={() => {
+                setInfoToOpen(info);
+                setShowInfoDetailsModal(true);
+              }}
+            >
+              <article className="w-[220px] h-[220px] text-start bg-white p-[12px] shadow-custom rounded-lg flex flex-col justify-between">
+                <h3 className="text-[22px] text-black font-bold">
+                  {info.title}
+                </h3>
+                <p className="text-grey text-ellipsis overflow-hidden">
+                  {info.content}
+                </p>
+              </article>
+            </button>
+          ))}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
-export default Mentoras;
+export default Informacoes;

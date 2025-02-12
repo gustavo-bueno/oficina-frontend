@@ -46,14 +46,12 @@ const Login = () => {
               <Input
                 placeholder="Email"
                 name="email"
-                error={!!errors.email}
-                errorMessage={errors.email?.message}
+                error={errors.email && errors.email.message}
               />
               <Input
                 placeholder="Senha"
                 name="password"
-                error={!!errors.password}
-                errorMessage={errors.password?.message}
+                error={errors.password && errors.password.message}
               />
               <div className="flex items-center justify-between">
                 <Button className="w-[280px]">Entrar</Button>

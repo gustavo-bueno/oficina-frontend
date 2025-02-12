@@ -16,12 +16,16 @@ const mentorSchema = yup.object().shape({
     .required("Campo obrigatório"),
 });
 
+type MentorForm = yup.InferType<typeof mentorSchema>;
+
 const Mentoras = () => {
-  const mentorForm = useForm<any>({
+  const mentorForm = useForm<MentorForm>({
     resolver: yupResolver(mentorSchema),
   });
 
   const onSubmit = async () => {};
+
+  const { errors } = mentorForm.formState;
 
   return (
     <FormProvider {...mentorForm}>
@@ -31,8 +35,17 @@ const Mentoras = () => {
           className="flex gap-[24px] mt-10 mb-16 items-center"
           onSubmit={mentorForm.handleSubmit(onSubmit)}
         >
-          <Input placeholder="Nome" className="max-w-[300px]" name="name" />
-          <Input placeholder="Email" name="email" />
+          <Input
+            placeholder="Nome"
+            containerClassName="max-w-[300px]"
+            name="name"
+            error={errors.name && errors.name?.message}
+          />
+          <Input
+            placeholder="Email"
+            name="email"
+            error={errors.email && errors.email?.message}
+          />
           <Button className="min-w-[298px]">Criar mentora</Button>
         </form>
         <ul className="flex flex-col gap-[36px]">
