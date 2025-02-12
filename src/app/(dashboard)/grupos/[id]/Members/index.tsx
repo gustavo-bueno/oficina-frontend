@@ -1,15 +1,21 @@
+"use client";
+
 import DeleteButton from "@/app/components/DeleteButton";
 import { useState } from "react";
 import CreateGroupMemberModal from "./CreateMemberModal";
 import MemberDetailsModal from "./MemberDetailsModal";
-import { Integrante } from "@/app/services/groups";
+import { deleteGroupMember, Integrante } from "@/app/services/groups";
+import { toast } from "react-toastify";
+import { useSession } from "next-auth/react";
 
 type MembersProps = {
   members: Integrante[];
   grupoId: string;
+  reloadMembers: () => void;
 };
 
-const Members = ({ members, grupoId }: MembersProps) => {
+const Members = ({ members, grupoId, reloadMembers }: MembersProps) => {
+  const { data: session } = useSession();
   const [openCreateMemberModal, setOpenCreateMemberModal] = useState(false);
   const [openMemberDetailsModal, setOpenMemberDetailsModal] = useState(false);
   const [memberToShow, setMemberToShow] = useState<Integrante>({
@@ -22,7 +28,19 @@ const Members = ({ members, grupoId }: MembersProps) => {
     grupoID: "",
   });
 
-  console.log(members);
+  const token = session?.user.token || "";
+
+  const deleteMember = async (id: string) => {
+    try {
+      const result = await deleteGroupMember(id, token);
+      if (result.success) {
+        toast.success("Integrante apagada com sucesso!");
+        reloadMembers();
+      }
+    } catch {
+      toast.error("Erro ao apagar integrante");
+    }
+  };
 
   return (
     <div>
@@ -30,6 +48,7 @@ const Members = ({ members, grupoId }: MembersProps) => {
         groupId={grupoId}
         close={() => setOpenCreateMemberModal(false)}
         open={openCreateMemberModal}
+        onSuccess={reloadMembers}
       />
       <MemberDetailsModal
         {...memberToShow}
@@ -57,11 +76,7 @@ const Members = ({ members, grupoId }: MembersProps) => {
           >
             {member.nome}
             <div onClick={(e) => e.stopPropagation()}>
-              <DeleteButton
-                onClick={() => {
-                  console.log("ihul");
-                }}
-              />
+              <DeleteButton onClick={() => deleteMember(member._id)} />
             </div>
           </div>
         ))}

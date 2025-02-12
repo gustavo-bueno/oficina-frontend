@@ -16,7 +16,7 @@ const Modal = ({ title, open, children, close }: ModalProps) => {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="p-6 border max-w-[670px] w-full shadow-lg rounded-md bg-white"
+        className="p-6 border max-w-[670px] max-h-[90%] overflow-y-auto w-full shadow-lg rounded-md bg-white"
       >
         <div className="flex items-center justify-between">
           <h3 className="text-[32px] font-bold text-black">{title}</h3>

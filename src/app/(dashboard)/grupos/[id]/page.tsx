@@ -1,7 +1,6 @@
 "use client";
 
 import DeleteButton from "@/app/components/DeleteButton";
-import MeetingCard from "@/app/components/MeetingCard";
 import { use, useEffect, useState } from "react";
 import Members from "./Members";
 import GroupStatus from "./GroupStatus";
@@ -9,54 +8,45 @@ import Meetings from "./Meetings";
 import EditGroupModal from "./EditGroupModal";
 import useGroups from "@/app/store/group";
 import { useSession } from "next-auth/react";
-import { getGroups } from "@/app/services/groups";
+import { deleteGroup, getGroups } from "@/app/services/groups";
 import { LoadingSpinner } from "@/app/components/Loading";
 import { RiEmotionSadLine } from "@remixicon/react";
-
-const name = "Meninas na computação";
-const seniority = "Iniciante";
-const integrantes = [
-  {
-    id: "2",
-    birthDate: "2004-06-22",
-    email: "gustavobcarvalho22@gmail.com",
-    name: "Gustavo Carvalho",
-    phone: "+55 (17) 99215-2344",
-    school: "UTFPR",
-  },
-  {
-    id: "1",
-    birthDate: "2003-06-22",
-    email: "gabipassotto@gmail.com",
-    name: "Gabriela Passotto",
-    phone: "+55 (17) 99215-2344",
-    school: "UTFPR",
-  },
-];
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const Grupo = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = use(params);
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
-
-  const { groups, setGroups } = useGroups((store) => store);
-  const group = groups.find((group) => group._id === id);
   const [openEditGroupModal, setOpenEditGroupModal] = useState(false);
+  const { groups, setGroups } = useGroups((store) => store);
+  const router = useRouter();
 
+  const group = groups.find((group) => group._id === id);
   const token = session?.user.token ?? "";
 
-  useEffect(() => {
-    const loadGroups = async () => {
-      setLoading(true);
-      const groupList = await getGroups(session?.user.token ?? "");
-      setGroups(groupList);
-      setLoading(false);
-    };
+  const loadGroups = async () => {
+    setLoading(true);
+    const groupList = await getGroups(session?.user.token ?? "");
+    setGroups(groupList);
+    setLoading(false);
+  };
 
+  const deleteCurrentGroup = async () => {
+    try {
+      const result = await deleteGroup(id, token);
+      if (result.success) {
+        toast.success("Grupo apagado com sucesso!");
+        router.push("/grupos");
+      }
+    } catch {
+      toast.error("Erro ao apagar grupo");
+    }
+  };
+
+  useEffect(() => {
     if (token && !groups.length) loadGroups();
   }, [token, groups.length]);
-
-  console.log(loading, groups.length);
 
   if (loading || !groups.length) {
     return (
@@ -68,7 +58,7 @@ const Grupo = ({ params }: { params: Promise<{ id: string }> }) => {
 
   if (!group) {
     return (
-      <div className="w-full h-screen text-[22px] flex flex-col font-bold text-darkGrey flex items-center justify-center">
+      <div className="w-full h-screen text-[22px] flex-col font-bold text-darkGrey flex items-center justify-center">
         <RiEmotionSadLine className="h-[50px] w-[50px] mb-2" />
         <h3> Nenhum grupo com esse ID foi encontrado</h3>
       </div>
@@ -78,9 +68,14 @@ const Grupo = ({ params }: { params: Promise<{ id: string }> }) => {
   return (
     <>
       <EditGroupModal
+        groupId={id}
+        onSuccess={async () => {
+          setOpenEditGroupModal(false);
+          await loadGroups();
+        }}
         open={openEditGroupModal}
-        name={name}
-        seniority={seniority}
+        name={group.nome}
+        seniority={group.senioridade}
         close={() => setOpenEditGroupModal(false)}
       />
       <div className="py-10">
@@ -93,11 +88,11 @@ const Grupo = ({ params }: { params: Promise<{ id: string }> }) => {
             >
               Editar grupo
             </button>
-            <DeleteButton onClick={() => {}} />
+            <DeleteButton onClick={deleteCurrentGroup} />
           </div>
         </div>
         <Meetings groupId={id} />
-        <GroupStatus activeStatus={group.status?.status} />
+        <GroupStatus groupId={id} activeStatus={group.status?.status} />
         {group.senioridade && (
           <>
             <h2 className="text-[28px] font-bold text-primary mb-2">
@@ -108,7 +103,11 @@ const Grupo = ({ params }: { params: Promise<{ id: string }> }) => {
             </p>
           </>
         )}
-        <Members members={group.integrantes} grupoId={id} />
+        <Members
+          members={group.integrantes}
+          grupoId={id}
+          reloadMembers={() => loadGroups()}
+        />
       </div>
     </>
   );

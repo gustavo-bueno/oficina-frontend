@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { useState } from "react";
-import { LoadingSpinner } from "../components/Loading";
 
 const loginSchema = yup.object().shape({
   email: yup.string().email("Email inválido").required("Campo obrigatório"),

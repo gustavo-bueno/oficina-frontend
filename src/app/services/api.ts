@@ -1,5 +1,5 @@
 type ApiProps = {
-  method: "POST" | "GET";
+  method: "POST" | "GET" | "PUT" | "DELETE";
   path: string;
   body?: any;
   token?: string;

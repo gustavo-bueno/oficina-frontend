@@ -1,36 +1,74 @@
 import Button from "@/app/components/Button";
 import Input from "@/app/components/Input";
 import Modal, { ModalProps } from "@/app/components/Modal";
+import { createGroupMember } from "@/app/services/groups";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import * as yup from "yup";
 
 const createGroupMemberSchema = yup.object().shape({
-  nome: yup
+  name: yup
     .string()
     .required("Campo obrigatório")
     .min(2, "O campo deve ter no mínimo dois caracteres"),
-  dataNascimento: yup.string().required("Campo obrigatório"),
-  escola: yup.string().required("Campo obrigatório"),
+  birthDate: yup.string().required("Campo obrigatório"),
+  school: yup.string().required("Campo obrigatório"),
   email: yup.string().required("Campo obrigatório").email("Email inválido"),
-  telefone: yup.string().required("Campo obrigatório"),
+  phone: yup.string().required("Campo obrigatório"),
 });
 
 export type GroupMemberFormData = yup.InferType<typeof createGroupMemberSchema>;
 
 type CreateGroupMemberModalProps = {
   groupId: string;
+  onSuccess: () => void;
 } & Omit<ModalProps, "title">;
 
-const CreateGroupMemberModal = (props: CreateGroupMemberModalProps) => {
+const CreateGroupMemberModal = ({
+  groupId,
+  onSuccess,
+  ...props
+}: CreateGroupMemberModalProps) => {
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(false);
+
   const createGroupMemberForm = useForm<GroupMemberFormData>({
     resolver: yupResolver(createGroupMemberSchema),
   });
-
+  const token = session?.user.token || "";
   const { errors } = createGroupMemberForm.formState;
 
-  const onSubmit = (data: GroupMemberFormData) => {
-    console.log(data);
+  const onSubmit = async (data: GroupMemberFormData) => {
+    setLoading(true);
+    try {
+      const result = await createGroupMember(
+        {
+          nome: data.name,
+          dataNascimento: data.birthDate,
+          grupoID: groupId,
+          escola: data.school,
+          email: data.email,
+          telefone: data.phone,
+        },
+        token,
+      );
+
+      if (result.success) {
+        toast.success("Integrante criada com sucesso!");
+        onSuccess();
+      } else {
+        throw Error("Erro ao criar integrante");
+      }
+    } catch {
+      toast.error(
+        "Não foi possível criar a integrante. Tente novamente mais tarde.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -43,26 +81,26 @@ const CreateGroupMemberModal = (props: CreateGroupMemberModalProps) => {
           <div className="flex flex-col gap-[32px]">
             <Input
               name="name"
-              placeholder="Nome do grupo"
-              error={errors.nome && errors.nome?.message}
+              placeholder="Nome da integrante"
+              error={errors.name && errors.name?.message}
             />
             <div>
-              <label htmlFor="date" className="text-black block mb-1">
+              <label htmlFor="birthDate" className="text-black block mb-1">
                 Data de nascimento
               </label>
               <Input
                 type="date"
                 className="max-w-[200px]"
-                name="date"
+                name="birthDate"
                 placeholder="Data de nascimento"
-                error={errors.dataNascimento && errors.dataNascimento?.message}
+                error={errors.birthDate && errors.birthDate?.message}
               />
             </div>
 
             <Input
               name="school"
               placeholder="Escola"
-              error={errors.escola && errors.escola?.message}
+              error={errors.school && errors.school?.message}
             />
             <Input
               name="email"
@@ -72,10 +110,12 @@ const CreateGroupMemberModal = (props: CreateGroupMemberModalProps) => {
             <Input
               name="phone"
               placeholder="Telefone"
-              error={errors.telefone && errors.telefone?.message}
+              error={errors.phone && errors.phone?.message}
             />
           </div>
-          <Button className="max-w-[286px] self-end mt-5">Adicionar</Button>
+          <Button loading={loading} className="max-w-[286px] self-end mt-5">
+            Adicionar
+          </Button>
         </form>
       </FormProvider>
     </Modal>

@@ -4,6 +4,7 @@ import CreateMeetingModal, { MeetingData } from "./CreateMeetingModal";
 import MeetingDetailsModal from "./MeetingModal";
 import { getGroupMeetings, Meeting } from "@/app/services/meetings";
 import { useSession } from "next-auth/react";
+import { LoadingSpinner } from "@/app/components/Loading";
 
 type MeetingsProps = {
   groupId: string;
@@ -16,7 +17,11 @@ const Meetings = ({ groupId }: MeetingsProps) => {
   const [meetingToShow, setMeetingToShow] = useState<Meeting>({
     _id: "",
     data: "",
-    usuarios: [],
+    usuarios: [
+      {
+        nome: "",
+      },
+    ],
     tema: "",
     concluido: false,
     observacoes: "",
@@ -28,14 +33,14 @@ const Meetings = ({ groupId }: MeetingsProps) => {
   const [showMeetingDetailsModal, setShowMeetingDetailsModal] = useState(false);
   const token = session?.user.token ?? "";
 
-  useEffect(() => {
-    const loadMeetings = async () => {
-      setLoading(true);
-      const groupList = await getGroupMeetings(token ?? "", groupId);
-      setMeetings(groupList);
-      setLoading(false);
-    };
+  const loadMeetings = async () => {
+    setLoading(true);
+    const groupList = await getGroupMeetings(token ?? "", groupId);
+    setMeetings(groupList);
+    setLoading(false);
+  };
 
+  useEffect(() => {
     if (token) loadMeetings();
   }, [token]);
 
@@ -50,8 +55,16 @@ const Meetings = ({ groupId }: MeetingsProps) => {
         {...meetingToShow}
         open={showMeetingDetailsModal}
         close={() => setShowMeetingDetailsModal(false)}
+        onSuccess={async () => {
+          loadMeetings();
+        }}
       />
       <CreateMeetingModal
+        groupId={groupId}
+        onSuccess={async () => {
+          setShowCreateMeetingModal(false);
+          loadMeetings();
+        }}
         open={showCreateMeetingModal}
         close={() => setShowCreateMeetingModal(false)}
       />
@@ -64,7 +77,8 @@ const Meetings = ({ groupId }: MeetingsProps) => {
           Adicionar encontro
         </button>
       </div>
-      <div className="flex flex-wrap gap-[32px] mt-5 mb-10 overflow-x-auto pb-1">
+      <div className="flex flex-wrap gap-[32px] mt-5 mb-10 overflow-x-auto min-h-[228px]">
+        {loading && <LoadingSpinner className="w-[30px] h-[30px]" />}
         {upcomingMeetings.map((encontro) => (
           <MeetingCard
             key={encontro._id}

@@ -38,8 +38,8 @@ const Grupos = () => {
         open={showCreateGroupModal}
         close={() => setShowCreateGroupModal(false)}
         onSuccess={async () => {
-          await loadGroups();
           setShowCreateGroupModal(false);
+          await loadGroups();
         }}
       />
       <div className="pt-10">
@@ -57,14 +57,14 @@ const Grupos = () => {
           {groups.map((group) => (
             <Link key={group._id} href={`/grupos/${group._id}`}>
               <div className="w-[300px] h-[300px] bg-white p-[12px] shadow-custom rounded-lg flex flex-col justify-between">
-                <div className="flex items-center gap-[6px] justify-between">
+                <div className="flex items-start gap-[12px] justify-between">
                   <p className="text-[22px] text-black font-bold">
                     {group.nome}
                   </p>
                   {group.status?.status && (
                     <div
                       style={{ background: getRandomColor() }}
-                      className="font-bold text-black rounded-full w-[120px] h-[30px] flex items-center justify-center"
+                      className="font-bold text-black mt-1 rounded-full min-w-[120px] px-4 min-h-[30px] flex items-center justify-center"
                     >
                       {group.status.status}
                     </div>

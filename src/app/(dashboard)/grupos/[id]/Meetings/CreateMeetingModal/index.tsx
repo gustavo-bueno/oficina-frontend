@@ -4,27 +4,42 @@ import Button from "@/app/components/Button";
 import Input from "@/app/components/Input";
 import Modal, { ModalProps } from "@/app/components/Modal";
 import { Select } from "@/app/components/Select";
+import { createMeeting } from "@/app/services/meetings";
 import { getMentors, Mentora } from "@/app/services/mentors";
-import { seniorityLevels } from "@/app/utils/data";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import * as yup from "yup";
 
 const createMeetingSchema = yup.object().shape({
   subject: yup.string().required("Campo obrigatório"),
-  mentors: yup.array().of(yup.string()).required("Campo obrigatório"),
+  mentors: yup
+    .array()
+    .of(yup.string())
+    .min(1, "Campo obrigatório")
+    .required("Campo obrigatório"),
   obs: yup.string(),
   date: yup.string().required("Campo obrigatório"),
-  time: yup.string(),
-  place: yup.string(),
+  time: yup.string().required("Campo obrigatório"),
+  place: yup.string().required("Campo obrigatório"),
 });
 
 export type MeetingData = yup.InferType<typeof createMeetingSchema>;
 
-const CreateMeetingModal = (props: Omit<ModalProps, "title">) => {
+type CreateMeetingModalProps = {
+  onSuccess: () => void;
+  groupId: string;
+} & Omit<ModalProps, "title">;
+
+const CreateMeetingModal = ({
+  onSuccess,
+  groupId,
+  ...props
+}: CreateMeetingModalProps) => {
   const { data: session } = useSession();
+  const [loading, setLoading] = useState(false);
   const [mentors, setMentors] = useState<Mentora[]>([]);
   const createMeetingForm = useForm<MeetingData>({
     resolver: yupResolver(createMeetingSchema),
@@ -47,8 +62,37 @@ const CreateMeetingModal = (props: Omit<ModalProps, "title">) => {
     value: mentor._id,
   }));
 
-  const onSubmit = (data: MeetingData) => {
-    console.log(data);
+  const onSubmit = async (data: MeetingData) => {
+    setLoading(true);
+    try {
+      const usuarios = data.mentors.filter(
+        (mentor) => typeof mentor === "string",
+      );
+      const result = await createMeeting(
+        {
+          data: data.date,
+          hora: data.time,
+          local: data.place,
+          grupoID: groupId,
+          observacoes: data.obs,
+          tema: data.subject,
+          usuarios,
+          concluido: false,
+        },
+        token,
+      );
+
+      if (result.success) {
+        toast.success("Encontro criado com sucesso!");
+        onSuccess();
+      } else {
+        throw new Error("Erro ao criar encontro");
+      }
+    } catch (error) {
+      toast.error("Erro ao criar encontro. Tente novamente mais tarde.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -107,7 +151,7 @@ const CreateMeetingModal = (props: Omit<ModalProps, "title">) => {
               error={errors.place && errors.place.message}
             />
           </div>
-          <Button className="max-w-[286px] self-end mt-4">
+          <Button loading={loading} className="max-w-[286px] self-end mt-4">
             Criar encontro
           </Button>
         </form>

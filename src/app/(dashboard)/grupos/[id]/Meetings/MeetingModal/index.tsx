@@ -1,9 +1,21 @@
+"use client";
+
 import DeleteButton from "@/app/components/DeleteButton";
 import Modal, { ModalProps } from "@/app/components/Modal";
 import Button from "@/app/components/Button";
-import { Meeting } from "@/app/services/meetings";
+import {
+  completeMeeting,
+  deleteMeeting,
+  Meeting,
+} from "@/app/services/meetings";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
 
-type MeetingDetailsModalProps = Meeting & Omit<ModalProps, "title">;
+type MeetingDetailsModalProps = Meeting &
+  Omit<ModalProps, "title"> & {
+    onSuccess: () => void;
+  };
 
 const MeetingDetailsModal = ({
   _id,
@@ -14,12 +26,14 @@ const MeetingDetailsModal = ({
   observacoes,
   tema,
   usuarios,
+  onSuccess,
+  close,
   ...props
 }: MeetingDetailsModalProps) => {
-  const deleteModal = () => {
-    console.log(_id);
-  };
+  const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
 
+  const token = session?.user.token || "";
   const formattedDate = new Date(data.replaceAll("/", "-")).toLocaleDateString(
     "pt-BR",
     {
@@ -27,13 +41,44 @@ const MeetingDetailsModal = ({
       month: "2-digit",
     },
   );
+  const mentoras = usuarios.map((usuario) => usuario.nome).join(", ");
+
+  const deleteCurrentMeeting = async () => {
+    try {
+      const result = await deleteMeeting(_id, token);
+      if (result.success) {
+        close();
+        toast.success("Encontro apagado com sucesso!");
+        onSuccess();
+      }
+    } catch {
+      toast.error("Erro ao apagar encontro");
+    }
+  };
+
+  const markMeetingAsCompleted = async () => {
+    setLoading(true);
+    try {
+      const result = await completeMeeting(_id, token);
+      if (result.success) {
+        onSuccess();
+        toast.success("Encontro concluído");
+      } else {
+        throw Error("Erro ao atualizar status");
+      }
+    } catch {
+      toast.error("Falha ao concluir encontro. Tente novamente mais tarde.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Modal {...props} title={`Encontro (${formattedDate})`}>
+    <Modal close={close} {...props} title={`Encontro (${formattedDate})`}>
       <div className="relative">
         <DeleteButton
           className="absolute right-[60px] top-[-40px]"
-          onClick={deleteModal}
+          onClick={deleteCurrentMeeting}
         />
         {hora && (
           <p className="text-[18px] text-black font-medium">Hora: {hora}</p>
@@ -50,9 +95,7 @@ const MeetingDetailsModal = ({
         <p className="text-[22px] text-black font-medium mb-6">{tema}</p>
 
         <h4 className="text-[18px] font-bold mt-8 text-primary">Mentoras</h4>
-        <p className="text-[22px] text-black font-medium mb-6">
-          {usuarios.join(", ")}.
-        </p>
+        <p className="text-[22px] text-black font-medium mb-6">{mentoras}.</p>
 
         <h4 className="text-[18px] font-bold mt-8 text-primary">Observações</h4>
         <p className="text-[22px] min-h-[200px] text-black font-medium mb-6">
@@ -65,7 +108,9 @@ const MeetingDetailsModal = ({
               Encontro concluído
             </p>
           ) : (
-            <Button onClick={() => {}}>Marcar como feito</Button>
+            <Button loading={loading} onClick={markMeetingAsCompleted}>
+              Marcar como feito
+            </Button>
           )}
         </div>
       </div>

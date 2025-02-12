@@ -3,7 +3,7 @@ export const LoadingSpinner = ({ className = "" }: { className?: string }) => {
     <div role="status" className="mx-auto">
       <svg
         aria-hidden="true"
-        className={`w-[100px] h-[100px] text-gray-100 animate-spin dark:text-gray-200 fill-primary ${className}`}
+        className={`w-[100px] h-[100px] z-0 text-gray-100 animate-spin dark:text-gray-200 fill-primary ${className}`}
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
