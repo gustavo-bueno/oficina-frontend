@@ -34,6 +34,10 @@ const field = tv({
       default: "",
       error: "border-red-600 hover:border-red-600",
     },
+    multiple: {
+      default: "",
+      multiple: "h-[80px]",
+    },
   },
 });
 
@@ -42,6 +46,7 @@ export function Select({
   options,
   placeholder,
   error,
+  multiple,
   defaultValue = "",
   containerClassName = "",
   ...props
@@ -54,8 +59,12 @@ export function Select({
       <div className={wrapper()}>
         <select
           id={name}
-          className={field({ status: error ? "error" : "default" })}
+          className={field({
+            status: error ? "error" : "default",
+            multiple: multiple ? "multiple" : "default",
+          })}
           {...props}
+          multiple={multiple}
           {...register(name)}
           defaultValue={defaultValue}
         >
