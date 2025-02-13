@@ -1,8 +1,11 @@
 import Button from "@/app/components/Button";
 import Input from "@/app/components/Input";
 import Modal, { ModalProps } from "@/app/components/Modal";
+import { createInformation } from "@/app/services/general-info";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import * as yup from "yup";
 
 const createInfoSchema = yup.object().shape({
@@ -12,19 +15,52 @@ const createInfoSchema = yup.object().shape({
 
 type CreateInfoForm = yup.InferType<typeof createInfoSchema>;
 
-const CreateInfoModal = (props: Omit<ModalProps, "title">) => {
+type CreateInfoModalProps = {
+  token: string;
+  onSuccess: () => void;
+} & Omit<ModalProps, "title">;
+
+const CreateInfoModal = ({
+  token,
+  onSuccess,
+  ...props
+}: CreateInfoModalProps) => {
+  const [loading, setLoading] = useState(false);
   const createInfoForm = useForm<CreateInfoForm>({
     resolver: yupResolver(createInfoSchema),
   });
 
   const { errors } = createInfoForm.formState;
 
-  const onSubmit = (data: CreateInfoForm) => {
-    console.log(data);
+  const onSubmit = async (data: CreateInfoForm) => {
+    setLoading(true);
+    try {
+      const result = await createInformation(
+        {
+          titulo: data.title,
+          conteudo: data.content,
+        },
+        token,
+      );
+
+      if (result.success) {
+        toast.success("Informação criada com sucesso!");
+        onSuccess();
+        createInfoForm.reset();
+      } else {
+        throw Error("Erro ao criar informação");
+      }
+    } catch {
+      toast.error(
+        "Não foi possível criar o informação. Tente novamente mais tarde.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Modal {...props} title="Criar grupo">
+    <Modal {...props} title="Criar informação">
       <FormProvider {...createInfoForm}>
         <form
           className="flex flex-col justify-between gap-[32px] pt-6"
@@ -45,7 +81,9 @@ const CreateInfoModal = (props: Omit<ModalProps, "title">) => {
               error={errors.content && errors.content?.message}
             />
           </div>
-          <Button className="max-w-[300px] self-end">Criar informação</Button>
+          <Button loading={loading} className="max-w-[300px] self-end">
+            Criar informação
+          </Button>
         </form>
       </FormProvider>
     </Modal>

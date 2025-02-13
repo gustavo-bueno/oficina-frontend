@@ -1,45 +1,58 @@
 "use client";
 
-import { RiExternalLinkLine } from "@remixicon/react";
+import { RiEmotionSadLine, RiExternalLinkLine } from "@remixicon/react";
 import Link from "next/link";
 import CreateInfoModal from "./CreateInfoModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InfoModal from "./InfoModal";
-
-type Info = {
-  id: string;
-  title: string;
-  content: string;
-};
+import { useSession } from "next-auth/react";
+import { GeneralInfo, getGeneralInfos } from "@/app/services/general-info";
+import { LoadingSpinner } from "@/app/components/Loading";
 
 const Informacoes = () => {
+  const { data: session } = useSession();
   const [showCreateInfoModal, setShowCreateInfoModal] = useState(false);
   const [showInfoDetailsModal, setShowInfoDetailsModal] = useState(false);
-  const [infoToOpen, setInfoToOpen] = useState<Info>({
-    id: "",
-    title: "",
-    content: "",
+  const [infoToOpen, setInfoToOpen] = useState<GeneralInfo>({
+    _id: "",
+    titulo: "",
+    conteudo: "",
   });
-  const [infos, setInfos] = useState<Array<Info>>([
-    {
-      id: "1",
-      title: "Sala de para encontros",
-      content: " Disponíveis: P104, P105, P106, P202",
-    },
-    {
-      id: "2",
-      title: "Templates Canva",
-      content: " Disponível em https://www.canva.com/templates/",
-    },
-  ]);
+  const [notes, setNotes] = useState<Array<GeneralInfo>>([]);
+  const [loading, setLoading] = useState(false);
+
+  const token = session?.user.token || "";
+
+  const loadGeneralNotes = async () => {
+    setLoading(true);
+    const notesList = await getGeneralInfos(token);
+    if (notesList) setNotes(notesList);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (token) {
+      loadGeneralNotes();
+    }
+  }, [token]);
 
   return (
     <>
       <CreateInfoModal
+        token={token}
         open={showCreateInfoModal}
         close={() => setShowCreateInfoModal(false)}
+        onSuccess={() => {
+          setShowCreateInfoModal(false);
+          loadGeneralNotes();
+        }}
       />
       <InfoModal
+        token={token}
+        onSuccess={() => {
+          setShowInfoDetailsModal(false);
+          loadGeneralNotes();
+        }}
         open={showInfoDetailsModal}
         close={() => setShowInfoDetailsModal(false)}
         {...infoToOpen}
@@ -68,24 +81,33 @@ const Informacoes = () => {
         </Link>
 
         <div className="flex flex-wrap gap-[24px]">
-          {infos.map((info, index) => (
-            <button
-              key={`info-${index}`}
-              onClick={() => {
-                setInfoToOpen(info);
-                setShowInfoDetailsModal(true);
-              }}
-            >
-              <article className="w-[220px] h-[220px] text-start bg-white p-[12px] shadow-custom rounded-lg flex flex-col justify-between">
-                <h3 className="text-[22px] text-black font-bold">
-                  {info.title}
-                </h3>
-                <p className="text-grey text-ellipsis overflow-hidden">
-                  {info.content}
-                </p>
-              </article>
-            </button>
-          ))}
+          {loading ? (
+            <LoadingSpinner />
+          ) : !notes.length ? (
+            <div className="w-full h-full pt-10 text-[22px] flex-col font-bold text-darkGrey flex items-center justify-center">
+              <RiEmotionSadLine className="h-[50px] w-[50px] mb-2" />
+              <h3> Nenhuma nota geral foi encontrada</h3>
+            </div>
+          ) : (
+            notes.map((info, index) => (
+              <button
+                key={`info-${index}`}
+                onClick={() => {
+                  setInfoToOpen(info);
+                  setShowInfoDetailsModal(true);
+                }}
+              >
+                <article className="w-[220px] h-[220px] text-start bg-white p-[12px] shadow-custom rounded-lg flex flex-col gap-[24px] justify-between">
+                  <h3 className="text-[22px] text-black font-bold">
+                    {info.titulo}
+                  </h3>
+                  <p className="text-grey text-ellipsis overflow-hidden">
+                    {info.conteudo}
+                  </p>
+                </article>
+              </button>
+            ))
+          )}
         </div>
       </div>
     </>

@@ -37,6 +37,7 @@ const Grupo = ({ params }: { params: Promise<{ id: string }> }) => {
       const result = await deleteGroup(id, token);
       if (result.success) {
         toast.success("Grupo apagado com sucesso!");
+        await loadGroups();
         router.push("/grupos");
       }
     } catch {

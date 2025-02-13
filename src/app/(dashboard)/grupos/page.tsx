@@ -53,32 +53,35 @@ const Grupos = () => {
           </button>
         </div>
         <div className="flex flex-wrap gap-[32px] mt-10">
-          {loading && <LoadingSpinner />}
-          {groups.map((group) => (
-            <Link key={group._id} href={`/grupos/${group._id}`}>
-              <div className="w-[300px] h-[300px] bg-white p-[12px] shadow-custom rounded-lg flex flex-col justify-between">
-                <div className="flex items-start gap-[12px] justify-between">
-                  <p className="text-[22px] text-black font-bold">
-                    {group.nome}
-                  </p>
-                  {group.status?.status && (
-                    <div
-                      style={{ background: getRandomColor() }}
-                      className="font-bold text-black mt-1 rounded-full min-w-[120px] px-4 min-h-[30px] flex items-center justify-center"
-                    >
-                      {group.status.status}
-                    </div>
-                  )}
+          {loading ? (
+            <LoadingSpinner />
+          ) : (
+            groups.map((group) => (
+              <Link key={group._id} href={`/grupos/${group._id}`}>
+                <div className="w-[300px] h-[300px] bg-white p-[12px] shadow-custom rounded-lg flex flex-col justify-between">
+                  <div className="flex items-start gap-[12px] justify-between">
+                    <p className="text-[22px] text-black font-bold">
+                      {group.nome}
+                    </p>
+                    {group.status?.status && (
+                      <div
+                        style={{ background: getRandomColor() }}
+                        className="font-bold text-black mt-1 rounded-full min-w-[120px] px-4 min-h-[30px] flex items-center justify-center"
+                      >
+                        {group.status.status}
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-grey">
+                    {group.integrantes.length}{" "}
+                    {group.integrantes.length === 1
+                      ? "integrante"
+                      : "integrantes"}
+                  </span>
                 </div>
-                <span className="text-grey">
-                  {group.integrantes.length}{" "}
-                  {group.integrantes.length === 1
-                    ? "integrante"
-                    : "integrantes"}
-                </span>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))
+          )}
         </div>
       </div>
     </>
