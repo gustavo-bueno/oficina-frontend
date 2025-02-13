@@ -58,6 +58,7 @@ const CreateGroupMemberModal = ({
 
       if (result.success) {
         toast.success("Integrante criada com sucesso!");
+        createGroupMemberForm.reset();
         onSuccess();
       } else {
         throw Error("Erro ao criar integrante");

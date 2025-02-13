@@ -84,6 +84,7 @@ const CreateMeetingModal = ({
 
       if (result.success) {
         toast.success("Encontro criado com sucesso!");
+        createMeetingForm.reset();
         onSuccess();
       } else {
         throw new Error("Erro ao criar encontro");

@@ -45,8 +45,8 @@ const CreateInfoModal = ({
 
       if (result.success) {
         toast.success("Informação criada com sucesso!");
-        onSuccess();
         createInfoForm.reset();
+        onSuccess();
       } else {
         throw Error("Erro ao criar informação");
       }

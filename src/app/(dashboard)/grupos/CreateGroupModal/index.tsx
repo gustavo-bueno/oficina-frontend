@@ -48,6 +48,7 @@ const CreateGroupModal = ({ onSuccess, ...props }: CreateGroupModalProps) => {
 
       if (result.success) {
         toast.success("Grupo criado com sucesso!");
+        createGroupForm.reset();
         onSuccess();
       } else {
         throw Error("Erro ao criar grupo");
