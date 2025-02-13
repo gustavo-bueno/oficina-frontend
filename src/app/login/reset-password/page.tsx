@@ -4,54 +4,57 @@ import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Input from "@/app/components/Input";
 import Button from "@/app/components/Button";
 import Link from "next/link";
+import { recoverPassword } from "@/app/services/auth";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-const loginSchema = yup.object().shape({
+const resetPasswordSchema = yup.object().shape({
   email: yup.string().email("Email inválido").required("Campo obrigatório"),
-  password: yup
-    .string()
-    .min(4, "Mínimo de 8 caracteres")
-    .required("Campo obrigatório"),
 });
 
-type LoginForm = {
+type ResetPasswordForm = {
   email: string;
-  password: string;
 };
 
-const Login = () => {
-  const loginForm = useForm<LoginForm>({
-    resolver: yupResolver(loginSchema),
+const ResetPassword = () => {
+  const [loading, setLoading] = useState(false);
+  const resetPasswordForm = useForm<ResetPasswordForm>({
+    resolver: yupResolver(resetPasswordSchema),
   });
+  const { errors } = resetPasswordForm.formState;
   const router = useRouter();
 
-  const { errors } = loginForm.formState;
-
-  const onSubmit = async (data: LoginForm) => {
-    const result = await signIn("credentials", {
-      redirect: false,
-      email: data.email,
-      password: data.password,
-    });
-
-    if (result?.error) {
-      toast.error("Erro ao logar. Verifique as credenciais e tente novamente.");
-    } else {
-      router.push("/mentoras");
+  const onSubmit = async (data: ResetPasswordForm) => {
+    setLoading(true);
+    try {
+      const { success } = await recoverPassword(data.email);
+      if (success) {
+        toast.success(
+          "Senha alterado com sucesso! Você será redirecionado para a tela de Login em 3 segundos",
+        );
+        router.push(`/login/validate-password?email=${data.email}`);
+      } else {
+        throw Error("Erro ao mandar email");
+      }
+    } catch {
+      toast.error(
+        "Não possível enviar o email de recuperação. Verique o email ou tente novamente mais tarde.",
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <FormProvider {...loginForm}>
+    <FormProvider {...resetPasswordForm}>
       <section className="flex justify-center pt-[64px]">
         <form
           className="w-full max-w-[600px]"
-          onSubmit={loginForm.handleSubmit(onSubmit)}
+          onSubmit={resetPasswordForm.handleSubmit(onSubmit)}
         >
           <h1 className="text-[42px] font-bold text-black">
             Esqueci minha senha
@@ -66,7 +69,9 @@ const Login = () => {
               error={errors.email && errors.email.message}
             />
             <div className="flex items-center justify-between">
-              <Button className="w-[300px]">Recuperar senha</Button>
+              <Button loading={loading} className="w-[300px]">
+                Recuperar senha
+              </Button>
               <Link href="/login" className="font-bold text-primary">
                 Voltar ao login
               </Link>
@@ -78,4 +83,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ResetPassword;

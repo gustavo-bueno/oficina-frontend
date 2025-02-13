@@ -5,6 +5,7 @@ import MeetingDetailsModal from "./MeetingModal";
 import { getGroupMeetings, Meeting } from "@/app/services/meetings";
 import { useSession } from "next-auth/react";
 import { LoadingSpinner } from "@/app/components/Loading";
+import { RiEmotionSadLine } from "@remixicon/react";
 
 type MeetingsProps = {
   groupId: string;
@@ -78,20 +79,28 @@ const Meetings = ({ groupId }: MeetingsProps) => {
         </button>
       </div>
       <div className="flex flex-wrap gap-[32px] mt-5 mb-10 overflow-x-auto min-h-[228px]">
-        {loading && <LoadingSpinner className="w-[30px] h-[30px]" />}
-        {upcomingMeetings.map((encontro) => (
-          <MeetingCard
-            key={encontro._id}
-            {...encontro}
-            date={encontro.data}
-            subject={encontro.tema}
-            completed={encontro.concluido}
-            onClick={() => {
-              setMeetingToShow(encontro);
-              setShowMeetingDetailsModal(true);
-            }}
-          />
-        ))}
+        {loading ? (
+          <LoadingSpinner className="w-[30px] h-[30px]" />
+        ) : !upcomingMeetings?.length ? (
+          <div className="w-full text-[22px] flex-col font-bold text-darkGrey flex items-center justify-center">
+            <RiEmotionSadLine className="h-[50px] w-[50px] mb-2" />
+            <p> Nenhum encontro cadastrado</p>
+          </div>
+        ) : (
+          upcomingMeetings.map((encontro) => (
+            <MeetingCard
+              key={encontro._id}
+              {...encontro}
+              date={encontro.data}
+              subject={encontro.tema}
+              completed={encontro.concluido}
+              onClick={() => {
+                setMeetingToShow(encontro);
+                setShowMeetingDetailsModal(true);
+              }}
+            />
+          ))
+        )}
       </div>
       {completedMeetings.length > 0 ? (
         <>
